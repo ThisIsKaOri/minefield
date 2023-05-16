@@ -1,0 +1,14 @@
+.box {
+    aspect-ratio: 1/1;
+    min-width: 35px;
+}
+
+.covered {
+    background-color: red;
+}
+
+.box::after{
+    width: 100%;
+    background-color: red;
+    position: relative;
+}
