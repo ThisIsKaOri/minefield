@@ -4,8 +4,37 @@
     justify-content: center;
     align-items: center;
     margin-top: 64px;
+    max-width: max-content;
+    aspect-ratio: 1/1;
+    padding: 16px;
+    border: 1px solid #c0c0c0;
+    border-radius: 8px;
+    background: #e0e0e0;
+    box-shadow:  35px 35px 70px #bebebe,
+                -35px -35px 70px #ffffff;  
 }
 
 .row {
     display: flex;
+}
+
+.reset {
+    margin: 16px;
+    padding: 20px 35px;
+    color: #707070;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #f0f0f0, #cacaca);
+    box-shadow:  7px 7px 28px #a4a4a4,
+                -7px -7px 28px #ffffff;
+}
+
+.reset:active {
+    border-radius: 10px;
+    background: #e0e0e0;
+    box-shadow: inset 7px 7px 28px #a4a4a4,
+                inset -7px -7px 28px #ffffff;
+}
+
+h1 {
+    color: #707070;
 }

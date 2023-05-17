@@ -1,14 +1,61 @@
 .box {
     aspect-ratio: 1/1;
     min-width: 35px;
+    position: relative;
+    border-radius: 2px;
+    background: #e0e0e0;
+    box-shadow: inset 4px 4px 7px #b3b3b3,
+                inset -4px -4px 7px #ffffff;
 }
 
 .covered {
-    background-color: red;
+    display: inline-block;
+    min-width: 100%;
+    aspect-ratio: 1/1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    background: #e0e0e0;
+    box-shadow:  3px 3px 7px #b6b6b6,
+                -3px -3px 7px #cacaca;
 }
 
-.box::after{
-    width: 100%;
-    background-color: red;
-    position: relative;
+.flag {
+    display: inline-block;
+    min-width: 100%;
+    aspect-ratio: 1/1;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    z-index: 1;
+}
+.gameOver {
+    border: 1px solid #909090;
+    background: #ff2424;
+    box-shadow: inset 35px 35px 70px #d91f1f,
+            inset -35px -35px 70px #ff2929; 
+}
+
+button {
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.green {
+    color: green;
+}
+
+.yellow {
+    color: yellow;
+}
+
+.orange {
+    color: orange;
+}
+
+.red {
+    color: red;
 }
