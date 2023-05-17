@@ -1,3 +1,13 @@
+.score {
+    min-width: 250px;
+    padding: 0px 30px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    background: #d28519;
+    box-shadow: inset 5px 5px 10px #8b5811,
+                inset -5px -5px 10px #ffb222;
+}
+
 .grid {
     display: flex;
     flex-direction: column;
@@ -19,22 +29,22 @@
 }
 
 .reset {
-    margin: 16px;
+    margin: 24px;
     padding: 20px 35px;
-    color: #707070;
+    color: #d28519;
     border-radius: 10px;
     background: linear-gradient(145deg, #f0f0f0, #cacaca);
-    box-shadow:  7px 7px 28px #a4a4a4,
-                -7px -7px 28px #ffffff;
+    box-shadow:  5px 5px 28px #a4a4a4,
+                -5px -5px 28px #ffffff;
 }
 
 .reset:active {
     border-radius: 10px;
     background: #e0e0e0;
-    box-shadow: inset 7px 7px 28px #a4a4a4,
-                inset -7px -7px 28px #ffffff;
+    box-shadow: inset 5px 5px 5px #a4a4a4,
+                inset -5px -5px 5px #ffffff;
 }
 
 h1 {
-    color: #707070;
+    color: #e0e0e0;
 }

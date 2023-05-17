@@ -17,7 +17,8 @@ type BoxProps = {
     grid: GridType;
     setGrid: React.Dispatch<React.SetStateAction<BoxType[][]>>;
     gameOver: boolean;
-    setGameOver: React.Dispatch<React.SetStateAction<boolean>>;
+    setGameOver: React.Dispatch<React.SetStateAction<boolean>>
+    onFlag: any;
 };
 
 const proximityIndexes = (row: number, col:number, grid:GridType) => {
@@ -102,19 +103,32 @@ const uncoverZeroes = (row: number, col: number, grid:GridType) => {
 
 };
 
+const totalFlags = (grid: GridType) => {
+    const rowFlagged = grid.map((row) => {
+        return row.reduce((flags, box) => { 
+            return box.isFlagged === true ? flags += 1 : flags;
+        }, 0)
+    });
 
-const Box = ({box, grid, setGrid, gameOver, setGameOver}: BoxProps) => {
+    return rowFlagged.reduce((totalFlagged, rowFlagged) => {
+        return totalFlagged += rowFlagged;
+    }, 0)
+};
+
+const Box = ({box, grid, setGrid, gameOver, setGameOver, onFlag}: BoxProps) => {
 
     const boxData = {
         ...box,
         value: proximityValue(box.row, box.col, grid),
         isFlagged: setFlag(box.row, box.col, grid)
     };
-
     const gridData = [...grid];
+    gridData[boxData.row][boxData.col] = {...boxData};
+
+    onFlag(totalFlags(gridData))
 
     const onClickHandler = () => {
-
+        
         if(!gameOver) {
 
             if(boxData.isBomb) {
@@ -126,22 +140,21 @@ const Box = ({box, grid, setGrid, gameOver, setGameOver}: BoxProps) => {
                         return box.isBomb ? box.isCovered = false : box.isCovered = true
                     });
                 });
-
-                setGrid(gridData);
+                setGrid([...gridData]);
             };
 
             if(boxData.isCovered === true && boxData.isBomb === false) {
 
                 boxData.isCovered = false;
-                gridData[boxData.row][boxData.col] = boxData;
+                gridData[boxData.row][boxData.col] = {...boxData};
 
                 uncoverZeroes(boxData.row, boxData.col, gridData);
 
-                setGrid(gridData);
+                setGrid([...gridData]);
             };
         } else {
 
-            setGrid(gridData);
+            setGrid([...gridData]);
         }
     };
 

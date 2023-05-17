@@ -1,7 +1,7 @@
 import './Grid.css';
 
 import Box, { BoxType } from './Box';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 export type GridType = BoxType[][];
@@ -51,39 +51,36 @@ const totalBombs = (grid: GridType) => {
     }, 0)
 };
 
-const totalFlags = (grid: GridType) => {
-    const rowFlagged = grid.map((row) => {
-        return row.reduce((flags, box) => { 
-            return box.isFlagged ? flags += 1 : flags;
-        }, 0)
-    })
-    return rowFlagged.reduce((totalFlagged, rowFlagged) => {
-        return totalFlagged += rowFlagged;
-    }, 0)
-};
 
 const Grid = ({settings: {width, height, bombDensity}}: GridProps ) => {
 
     const [grid, setGrid] = useState(generateGrid(width, height, bombDensity));
     const [bombs, setBombs] = useState(totalBombs(grid));
+    const [flags, setFlags] = useState(0);
     const [gameOver, setGameOver] = useState(false);
     const [win, setWin] = useState(false);
 
-    if(bombs - totalFlags(grid) === 0) {
-        setWin(true);
-    }
-    console.log(totalFlags(grid));
-    
     const reset = () => {
         setGrid(generateGrid(width, height, bombDensity));
-        setGameOver(false);
         setBombs(totalBombs(grid));
+        setFlags(0);
+        setGameOver(false);
+        setWin(false);
     }
+
+    const onFlagHandler = (n: number) => {
+
+        setFlags(n);
+    } 
+
+    if(bombs === flags) setWin(true);
 
     return (
         <>
-        {!win && <h1>{gameOver ? `Game Over` : `BOMBS: ${bombs}`}</h1>}
-        {win && <h1>You Win!</h1>}
+        <div className="score">
+            {!win && <h1>{gameOver ? `GAME OVER` : `BOMBS: ${bombs - flags}`}</h1>}
+            {win && <h1>You Win!</h1>}
+        </div>
         <div className="grid">
             {grid.map((row) => {
                 
@@ -93,7 +90,8 @@ const Grid = ({settings: {width, height, bombDensity}}: GridProps ) => {
                         return <Box grid={grid} box={box}
                             setGrid={setGrid}
                             gameOver={gameOver}
-                            setGameOver={setGameOver}/>
+                            setGameOver={setGameOver}
+                            onFlag={onFlagHandler}/>
                         })}
                     </div>
                 );
