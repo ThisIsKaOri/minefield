@@ -13,7 +13,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin-top: 64px;
+    margin-top: 26px;
     max-width: max-content;
     aspect-ratio: 1/1;
     padding: 16px;
@@ -47,4 +47,7 @@
 
 h1 {
     color: #e0e0e0;
+}
+p {
+    color: #666;
 }

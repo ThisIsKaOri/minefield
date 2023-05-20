@@ -1,7 +1,7 @@
 import './Grid.css';
 
 import Box, { BoxType } from './Box';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 
 export type GridType = BoxType[][];
@@ -19,12 +19,8 @@ const generateGrid = (width: number, height: number, bombDensity:number) => {
 
     const newBox = (x:number, y:number, bombDensity:number): BoxType => {
 
-        const randomBombs = (bombDensity: number) => {
-            return Math.random() < bombDensity;
-        };
-
         return {
-            isBomb: randomBombs(bombDensity),
+            isBomb: Math.random() < bombDensity,
             isCovered: true,
             isFlagged: false,
             value: 0,
@@ -33,61 +29,64 @@ const generateGrid = (width: number, height: number, bombDensity:number) => {
         };
     };
 
-    return Array.from(Array(height), (_, y) => {
-        return Array.from(Array(width)).map((_, x) => {
-            return newBox(x, y, bombDensity)
-        });
-    });
+    const grid = Array.from(Array(height), (_, y) => 
+        Array.from(Array(width)).map((_, x) => 
+            newBox(x, y, bombDensity)
+        )
+    );
+    return grid
 };
 
-const totalBombs = (grid: GridType) => {
-    const rowBombs = grid.map((row) => {
-        return row.reduce((bombs, box) => { 
-            return box.isBomb ? bombs += 1 : bombs;
-        }, 0)
-    })
-    return rowBombs.reduce((totalBombs, rowBombs) => {
-        return totalBombs += rowBombs;
-    }, 0)
-};
+const count = (grid: GridType, target: keyof BoxType) => 
+    grid.reduce((item,row) => 
+        item += row.reduce((rowItem, box) =>  
+            rowItem += box[target] ? 1 : 0 
+        , 0)
+    , 0);
 
 
 const Grid = ({settings: {width, height, bombDensity}}: GridProps ) => {
 
     const [grid, setGrid] = useState(generateGrid(width, height, bombDensity));
-    const [bombs, setBombs] = useState(totalBombs(grid));
+    const [bombs, setBombs] = useState(count(grid, 'isBomb'));
     const [flags, setFlags] = useState(0);
     const [gameOver, setGameOver] = useState(false);
-    const [win, setWin] = useState(false);
 
     const reset = () => {
-        setGrid(generateGrid(width, height, bombDensity));
-        setBombs(totalBombs(grid));
+        const newGrid = generateGrid(width, height, bombDensity)
+        setGrid(newGrid);
+        setBombs(count(newGrid, 'isBomb'));
         setFlags(0);
         setGameOver(false);
-        setWin(false);
     }
 
-    const onFlagHandler = (n: number) => {
-
-        setFlags(n);
+    const onFlagHandler = (grid: GridType) => {
+        
+        setFlags(count(grid, 'isFlagged'));
     } 
-
-    if(bombs === flags) setWin(true);
+    
+    const allBombsFlagged = grid.every((row) =>
+        row.every((box) => box.isBomb ? box.isFlagged : true)
+    );
+    
+    if(allBombsFlagged) {
+        console.log(`hai vinto`);
+    }
 
     return (
         <>
-        <div className="score">
-            {!win && <h1>{gameOver ? `GAME OVER` : `BOMBS: ${bombs - flags}`}</h1>}
-            {win && <h1>You Win!</h1>}
+        <div key='score' className="score">
+            {!allBombsFlagged && <h1>{gameOver ? `GAME OVER` : `BOMBS: ${bombs - flags}`}</h1>}
+            {allBombsFlagged && <h1>You Win!</h1>}
         </div>
-        <div className="grid">
-            {grid.map((row) => {
+        <p>try to find all the bombs</p>
+        <div key='grid' className="grid">
+            {grid.map((row, y) => {
                 
                 return (
-                    <div className="row">
-                        {row.map((box) => {
-                        return <Box grid={grid} box={box}
+                    <div key={`row ${y}`} className="row">
+                        {row.map((box, x) => {
+                        return <Box key={`Box ${y}.${x}`} grid={grid} box={box}
                             setGrid={setGrid}
                             gameOver={gameOver}
                             setGameOver={setGameOver}
@@ -97,7 +96,7 @@ const Grid = ({settings: {width, height, bombDensity}}: GridProps ) => {
                 );
             })}
         </div>
-        <button className='reset' onClick={reset}>
+        <button key='reset' className='reset' onClick={reset}>
             {!gameOver ? `RESET`: `RETRY`}
         </button>
         </>

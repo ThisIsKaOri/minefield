@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import './Box.css';
 import { GridType } from './Grid';
 
@@ -18,7 +17,7 @@ type BoxProps = {
     setGrid: React.Dispatch<React.SetStateAction<BoxType[][]>>;
     gameOver: boolean;
     setGameOver: React.Dispatch<React.SetStateAction<boolean>>
-    onFlag: any;
+    onFlag: (grid: GridType) => void;
 };
 
 const proximityIndexes = (row: number, col:number, grid:GridType) => {
@@ -39,9 +38,28 @@ const proximityIndexes = (row: number, col:number, grid:GridType) => {
 
 const proximityValue = (row: number, col: number, grid:GridType) => {
     
-    return proximityIndexes(row, col, grid).reduce((value, [row, col]) => {
-        return grid[row][col].isBomb ? value + 1 : value
-    }, 0);
+    return proximityIndexes(row, col, grid).reduce((value, [row, col]) => 
+        grid[row][col].isBomb ? value + 1 : value
+    , 0);
+};
+
+const zeroValuesAround = (row: number, col: number, grid:GridType) => {
+
+    return proximityIndexes(row, col, grid).filter(([row, col]) => 
+        proximityValue(row, col, grid) === 0
+    );
+};
+
+const uncoverZeroes = (row: number, col: number, grid:GridType) => {
+
+    const zeroBoxes = zeroValuesAround(row, col, grid)
+    zeroBoxes.map(([row, col]) => {
+                
+        if(!grid[row][col].isBomb){
+            grid[row][col].isCovered = false;
+        };
+    });
+    //zeroBoxes.map(([row, col]) => uncoverZeroes(row, col, grid));
 };
 
 const setFlag = (row: number, col: number, grid:GridType) => {
@@ -49,7 +67,8 @@ const setFlag = (row: number, col: number, grid:GridType) => {
     if(grid[row][col].isBomb){
 
         const uncoveredAround = proximityIndexes(row, col, grid)
-        .filter(([subR, subC]) => grid[subR][subC].isCovered === false || grid[subR][subC].isCovered && grid[subR][subC].isBomb);
+        .filter(([subR, subC]) => grid[subR][subC].isCovered === false || 
+        (grid[subR][subC].isCovered && grid[subR][subC].isBomb));
 
         if(uncoveredAround.length === 3){
         
@@ -82,82 +101,9 @@ const setFlag = (row: number, col: number, grid:GridType) => {
     return false;
 };
 
-const zeroValuesAround = (row: number, col: number, grid:GridType) => {
-
-    return proximityIndexes(row, col, grid).filter(([row, col]) => {
-        return proximityValue(row, col, grid) === 0;
-    });
-};
-
-const uncoverZeroes = (row: number, col: number, grid:GridType) => {
-
-    const zeroBoxes = zeroValuesAround(row, col, grid)
-    zeroBoxes.map(([row, col]) => {
-                
-        if(grid[row][col].isBomb === false){
-            grid[row][col].isCovered = false;
-        };
-    }); 
-    
-    
-
-};
-
-const totalFlags = (grid: GridType) => {
-    const rowFlagged = grid.map((row) => {
-        return row.reduce((flags, box) => { 
-            return box.isFlagged === true ? flags += 1 : flags;
-        }, 0)
-    });
-
-    return rowFlagged.reduce((totalFlagged, rowFlagged) => {
-        return totalFlagged += rowFlagged;
-    }, 0)
-};
 
 const Box = ({box, grid, setGrid, gameOver, setGameOver, onFlag}: BoxProps) => {
-
-    const boxData = {
-        ...box,
-        value: proximityValue(box.row, box.col, grid),
-        isFlagged: setFlag(box.row, box.col, grid)
-    };
-    const gridData = [...grid];
-    gridData[boxData.row][boxData.col] = {...boxData};
-
-    onFlag(totalFlags(gridData))
-
-    const onClickHandler = () => {
-        
-        if(!gameOver) {
-
-            if(boxData.isBomb) {
-
-                setGameOver(true);
-                boxData.isCovered = false;
-                gridData.map((row) => {
-                    row.map((box: BoxType) => {
-                        return box.isBomb ? box.isCovered = false : box.isCovered = true
-                    });
-                });
-                setGrid([...gridData]);
-            };
-
-            if(boxData.isCovered === true && boxData.isBomb === false) {
-
-                boxData.isCovered = false;
-                gridData[boxData.row][boxData.col] = {...boxData};
-
-                uncoverZeroes(boxData.row, boxData.col, gridData);
-
-                setGrid([...gridData]);
-            };
-        } else {
-
-            setGrid([...gridData]);
-        }
-    };
-
+    
     const valueColor = [
         '', 
         'green', 
@@ -168,16 +114,54 @@ const Box = ({box, grid, setGrid, gameOver, setGameOver, onFlag}: BoxProps) => {
         'red', 
         'red'
     ];
+    const boxData = {
+        ...box,
+        value: proximityValue(box.row, box.col, grid),
+        isFlagged: !gameOver ? setFlag(box.row, box.col, grid) : false
+    };
+    const gridData = [...grid];
+    gridData[boxData.row][boxData.col] = {...boxData};
+
+    onFlag(gridData)
+
+    const onClickHandler = () => {
+        
+        if(!gameOver) {
+
+            if(boxData.isBomb) {
+
+                setGameOver(true);
+                boxData.isCovered = false;
+                gridData.map((row) => 
+                    row.map((box: BoxType) => 
+                        box.isCovered = false
+                    )
+                );
+            };
+
+            if(boxData.isCovered && !boxData.isBomb) {
+
+                boxData.isCovered = false;
+                gridData[boxData.row][boxData.col] = {...boxData};
+
+                uncoverZeroes(boxData.row, boxData.col, gridData);
+            };
+        }
+
+        setGrid([...gridData]);   
+    };
+
 
     return(
 
-        <button key={`${boxData.row}${boxData.col}`}
-            className={`box ${valueColor[boxData.value]} ${boxData.value} ${gameOver && boxData.isBomb ? 'gameOver' : ''}`}
+        <button key={`${box.row}${box.col}`}
+            className={`box ${valueColor[boxData.value]} ${boxData.value} 
+            ${gameOver && boxData.isBomb ? 'gameOver' : ''}`}
             onClick={onClickHandler}>
             {boxData.isFlagged ? <span className="flag">🚩</span> : ``}
             {!boxData.isCovered ? (
                 boxData.isBomb? `💣`: (
-                    boxData.value != 0 ? boxData.value : ''
+                    boxData.value !== 0 ? boxData.value : ''
                     )
                 ) : ``}
             {boxData.isCovered && <span className='covered'></span>}
