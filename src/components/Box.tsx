@@ -50,16 +50,20 @@ const zeroValuesAround = (row: number, col: number, grid:GridType) => {
     );
 };
 
-const uncoverZeroes = (row: number, col: number, grid:GridType) => {
+const uncoverZeroes = (row: number, col: number, grid:GridType, 
+    checked: [number, number][] = [[row, col]]) => {
 
-    const zeroBoxes = zeroValuesAround(row, col, grid)
-    zeroBoxes.map(([row, col]) => {
+    zeroValuesAround(row, col, grid).map(([row, col]) => {
                 
-        if(!grid[row][col].isBomb){
+        if (!grid[row][col].isBomb  &&
+            !checked.some(([y, x]) => y === row && x === col)){
+
             grid[row][col].isCovered = false;
+            checked.push([row, col]);
+            
+            uncoverZeroes(row, col, grid, checked);
         };
     });
-    //zeroBoxes.map(([row, col]) => uncoverZeroes(row, col, grid));
 };
 
 const setFlag = (row: number, col: number, grid:GridType) => {
